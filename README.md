@@ -1,6 +1,6 @@
 # gumbel_sigmoid
 
-A pytorch implementation of the gumbel sigmoid gate [paper]([https://duckduckgo.com](https://arxiv.org/pdf/1611.00712.pdf))
+A pytorch implementation of the gumbel sigmoid gate ([paper](https://arxiv.org/pdf/1611.00712.pdf))
 
 # example
 
