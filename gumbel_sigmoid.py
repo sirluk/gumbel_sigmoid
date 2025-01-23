@@ -25,9 +25,11 @@ def gumbel_sigmoid(logits: Tensor, temp: float = 1, hard: bool = False, threshol
       be probability distributions.
 
     """
+    if temp >= 1 or temp <= 0:
+        raise ValueError("Temperature must be in (0, 1)")
 
     g = Gumbel(0, 1).sample((2, *logits.shape))
-    out = torch.sigmoid((logits + g[0] - g[1]) / temp)
+    out = torch.sigmoid((logits + g[0] - g[1]) / (1-temp))
 
     if hard:
         # straight through
