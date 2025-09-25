@@ -25,15 +25,20 @@ def gumbel_sigmoid(logits: Tensor, temp: float = 1, hard: bool = False, threshol
       be probability distributions.
 
     """
-    if temp >= 1 or temp <= 0:
-        raise ValueError("Temperature must be in (0, 1)")
+    # Temperature must be positive.
+    if temp <= 0:
+        raise ValueError("Temperature must be positive")
 
-    g = Gumbel(0, 1).sample((2, *logits.shape))
-    out = torch.sigmoid((logits + g[0] - g[1]) / (1-temp))
+    # Sample Gumbel noise. The difference of two Gumbels is equivalent to a Logistic distribution.
+    gumbel_noise = Gumbel(0, 1).sample(logits.shape).to(logits.device) - \
+                   Gumbel(0, 1).sample(logits.shape).to(logits.device)
+    
+    # Apply the reparameterization trick
+    y_soft = torch.sigmoid((logits + gumbel_noise) / temp)
 
     if hard:
-        # straight through
-        indices = out > threshold
-        out = indices.int() - out.detach() + out
-
-    return out
+        # Straight-Through Estimator
+        y_hard = (y_soft > threshold).float()
+        return y_hard - y_soft.detach() + y_soft
+    
+    return y_soft
